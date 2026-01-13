@@ -1,68 +1,77 @@
 import os
-import shutil
+import torch
 from transformers import AutoTokenizer, AutoModelForMaskedLM
+from deepfocus import FOCUS
 
 # --- CONFIGURATION ---
 ORIGINAL_MODEL = "skulick/xlmb-ybc-ck05"
 VOCAB_FILE = "./data/processed/yiddish_vocab.txt"
-OUTPUT_DIR = "./output/phase1_expanded_model"
-TARGET_NEW_TOKENS = 2000 
+OUTPUT_DIR = "./output/phase1_focus_model"
+TARGET_NEW_TOKENS = 2000
 
-# 🛡️ SAFETY: Force the download to go to the Big Drive
-# We create a specific folder for cache so it never touches your Home quota
+# 📍 DIRECT PATHS (The simple way)
+# 1. Your 4.5GB FastText Brain
+FASTTEXT_PATH = "/vol/joberant_nobck/data/NLP_368307701_2526a/omriboiman/fasttext_models/cc.yi.300.bin"
+# 2. Your JSONL Data (Created in Step 1)
+DATA_PATH = "./data/processed/ybc_focus.jsonl" 
+
+# 🛡️ Cache Safety
 CACHE_DIR = "/vol/joberant_nobck/data/NLP_368307701_2526a/omriboiman/cache"
-os.makedirs(CACHE_DIR, exist_ok=True)
 
-def inject_vocab():
-    print(f" Loading YBC model: {ORIGINAL_MODEL}")
-    print(f"   (Downloading to safe storage: {CACHE_DIR})")
+def run_official_focus():
+    print(f"🚀 Starting FOCUS Injection (Standard Mode)...")
     
-    try:
-        # We explicitly tell it WHERE to download
-        tokenizer = AutoTokenizer.from_pretrained(ORIGINAL_MODEL, cache_dir=CACHE_DIR)
-        model = AutoModelForMaskedLM.from_pretrained(ORIGINAL_MODEL, cache_dir=CACHE_DIR)
-    except Exception as e:
-        print(f"❌ Error loading model: {e}")
+    # 1. Validation
+    if not os.path.exists(FASTTEXT_PATH):
+        print(f"❌ Error: FastText file missing at {FASTTEXT_PATH}")
         return
-    
-    # 1. Load the Gold Standard Vocab
-    if not os.path.exists(VOCAB_FILE):
-        print(f"❌ Error: Vocab file not found at {VOCAB_FILE}")
+    if not os.path.exists(DATA_PATH):
+        print(f"❌ Error: JSONL data missing at {DATA_PATH}. Run the conversion one-liner first!")
         return
 
-    with open(VOCAB_FILE, 'r', encoding='utf-8') as f:
-        jochre_words = [line.strip() for line in f if line.strip()]
-    
-    print(f"   Loaded {len(jochre_words)} candidate words from Jochre.")
+    # 2. Load Base Model
+    print(f"   Loading base model: {ORIGINAL_MODEL}")
+    source_tokenizer = AutoTokenizer.from_pretrained(ORIGINAL_MODEL, cache_dir=CACHE_DIR)
+    source_model = AutoModelForMaskedLM.from_pretrained(ORIGINAL_MODEL, cache_dir=CACHE_DIR)
 
-    # 2. Find Missing Tokens
-    new_tokens_to_add = []
-    print("   Scanning for fragmented tokens...")
+    # 3. Create Target Tokenizer
+    print("   Preparing new vocabulary...")
+    target_tokenizer = AutoTokenizer.from_pretrained(ORIGINAL_MODEL, cache_dir=CACHE_DIR)
+    # This file contains the 2,000 common words from Jochre we found earlier
+    with open(VOCAB_FILE, 'r') as f:
+        candidates = [line.strip() for line in f if line.strip()]
     
-    for word in jochre_words:
-        tokens = tokenizer.tokenize(word)
-        if len(tokens) > 1:
-            new_tokens_to_add.append(word)
-        if len(new_tokens_to_add) >= TARGET_NEW_TOKENS:
-            break
+    tokens_to_add = []
+    for word in candidates:
+        if len(tokens_to_add) >= TARGET_NEW_TOKENS: break
+        if len(source_tokenizer.tokenize(word)) > 1:
+            tokens_to_add.append(word)
             
-    print(f"   Found {len(new_tokens_to_add)} important words to inject.")
+    print(f"   Adding {len(tokens_to_add)} new tokens...")
+    target_tokenizer.add_tokens(tokens_to_add)
+
+    # 4. RUN FOCUS ⚗️
+    # We pass the paths directly, exactly like the README says.
+    print("   ⚗️  Running FOCUS (Using Local FastText + YBC Data)...")
     
-    # 3. Inject into Tokenizer
-    if new_tokens_to_add:
-        num_added = tokenizer.add_tokens(new_tokens_to_add)
-        print(f"✅ Added {num_added} new tokens to the tokenizer.")
-        
-        # 4. Resize Model Embeddings
-        model.resize_token_embeddings(len(tokenizer))
-        
-        # 5. Save
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        model.save_pretrained(OUTPUT_DIR)
-        tokenizer.save_pretrained(OUTPUT_DIR)
-        print(f"💾 Saved expanded model to: {OUTPUT_DIR}")
-    else:
-        print("⚠️ No new tokens needed!")
+    source_embeddings = source_model.get_input_embeddings().weight
+    
+    target_embeddings = FOCUS(
+        source_embeddings=source_embeddings,
+        source_tokenizer=source_tokenizer,
+        target_tokenizer=target_tokenizer,
+        target_training_data_path=DATA_PATH,  # <--- Your Data
+        fasttext_model_path=FASTTEXT_PATH     # <--- Your 4.5GB File
+    )
+
+    # 5. Save
+    print("   💾 Applying new embeddings...")
+    source_model.resize_token_embeddings(len(target_tokenizer))
+    source_model.get_input_embeddings().weight.data = target_embeddings
+    
+    source_model.save_pretrained(OUTPUT_DIR)
+    target_tokenizer.save_pretrained(OUTPUT_DIR)
+    print(f"✅ SUCCESS! Model saved to {OUTPUT_DIR}")
 
 if __name__ == "__main__":
-    inject_vocab()
+    run_official_focus()
