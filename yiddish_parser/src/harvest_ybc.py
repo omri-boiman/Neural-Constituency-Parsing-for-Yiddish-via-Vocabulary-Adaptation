@@ -2,8 +2,9 @@ import os
 import requests
 import time
 
+
 # --- CONFIGURATION ---
-TARGET_COUNT = 300       # We want 300 books
+TARGET_COUNT = 400       # We want 400 books
 START_ID = 200000        # The ID to start counting from (Public domain starts here)
 OUTPUT_FOLDER = "data/raw/ybc/books"
 
@@ -17,7 +18,7 @@ def download_books():
     print(f"🚀 Starting mission: Download {TARGET_COUNT} Yiddish books...")
     print(f"📂 Saving to folder: {OUTPUT_FOLDER}\n")
 
-    # Loop until we have 100 books
+    # Loop until we have 400 books
     while downloaded_count < TARGET_COUNT:
         # Construct the ID (e.g., "nybc200001")
         book_id = f"nybc{current_id_num}"

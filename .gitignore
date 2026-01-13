@@ -1,0 +1,50 @@
+# External cloned repositories (avoid copyright issues)
+yiddish_parser/data/raw/ppchyprep/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model checkpoints and outputs
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+output/
+logs/
+wandb/
+
+# Large datasets and downloads
+*.tar.gz
+*.zip
+*.7z
+Anaconda3-*.sh
+anaconda3/
+data/
