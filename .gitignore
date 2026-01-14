@@ -48,3 +48,4 @@ wandb/
 Anaconda3-*.sh
 anaconda3/
 data/
+data/raw/ppchyprep/
