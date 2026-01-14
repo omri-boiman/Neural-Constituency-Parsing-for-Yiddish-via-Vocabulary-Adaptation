@@ -6,7 +6,7 @@ import collections
 import os
 
 # --- CONFIGURATION ---
-MODEL_PATH = "./output/phase2_trained/checkpoint-3000"
+MODEL_PATH = "./output/phase2_trained/checkpoint-6000"
 TEST_FILE = "./data/processed/jochre_test_combined.txt" 
 VOCAB_FILE = "./data/processed/yiddish_vocab.txt"
 
