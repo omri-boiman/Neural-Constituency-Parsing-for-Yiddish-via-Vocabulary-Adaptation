@@ -19,7 +19,7 @@ import supar
 try:
     from supar.utils import Config
 except ImportError:
-    from supar.config import Config 
+    from supar.config import Config
 
 from supar import CRFConstituencyParser
 
