@@ -19,22 +19,20 @@ import supar
 try:
     from supar.utils import Config
 except ImportError:
-    from supar.config import Config 
+    from supar.config import Config
 
 from supar import CRFConstituencyParser
 
 # ================= CONFIGURATION =================
-# 🔴 CONTROL GROUP: The Raw Model (No Adaptation)
-ENCODER_PATH = 'skulick/xlmb-ybc-ck05' 
-
-# Save to a separate folder for comparison
-OUTPUT_DIR = './output/kulick_raw_baseline'
-MODEL_FILE = os.path.join(OUTPUT_DIR, 'kulick_raw.pt')
+# 🟢 FIX: Separate the Folder from the File
+OUTPUT_DIR = './output/phase3_parser_model_12000'
+MODEL_FILE = os.path.join(OUTPUT_DIR, 'yiddish_parser.pt')
 
 # Make the folder
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 DATA_DIR = 'data/processed/supar_ready'
+ENCODER_PATH = './output/phase2_trained/checkpoint-12000' 
 # =================================================
 
 def freeze_recursive(module):
@@ -84,19 +82,27 @@ def train():
     apply_freeze_patch()
 
     args = {
+        # 1. Paths
         'train': os.path.join(DATA_DIR, 'train.txt'),
         'dev': os.path.join(DATA_DIR, 'dev.txt'),
         'test': os.path.join(DATA_DIR, 'test.txt'),
+        
+        # 🟢 FIX: Save to the FILE, not the FOLDER
         'path': MODEL_FILE,
+        
         'mode': 'train',
         'build': True,
         'checkpoint': False, 
+
+        # 2. Encoder
         'encoder': 'bert',
         'bert': ENCODER_PATH,
         'finetune': False,
         'n_bert_layers': 4,
         'bert_pooling': 'mean',
         'mix_dropout': 0.0,
+        
+        # 3. Model Architecture
         'feat': ['char'],
         'n_embed': 100,
         'n_char_embed': 50,
@@ -109,6 +115,8 @@ def train():
         'n_label_mlp': 100,
         'mlp_dropout': 0.33,
         'embed_dropout': 0.33,
+        
+        # 4. Training
         'lr': 5e-5,
         'lr_rate': 20,
         'batch_size': 2000,
@@ -124,10 +132,14 @@ def train():
         'eps': 1e-8,
         'mu': 0.9,
         'nu': 0.9,
+        
+        # 5. Eval
         'structure': 'joint',
         'mbr': True,
         'delete': {'TOP', 'S1', '-NONE-', ',', ':', '``', "''", '.', '?', '!', ''},
         'equal': {'ADVP': 'PRT'},
+        
+        # 6. System
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
         'seed': 1,
         'amp': False,
@@ -138,7 +150,7 @@ def train():
         'workers': 0 
     }
     
-    print(f"🚀 Starting BASELINE Training (Raw Kulick Model): {ENCODER_PATH}")
+    print(f"🚀 Starting Training for: {ENCODER_PATH}")
     print(f"💾 Saving model to: {MODEL_FILE}")
     
     config = Config(**args)

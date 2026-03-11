@@ -3,8 +3,8 @@ from huggingface_hub import login # <--- Import login tool
 
 # --- 1. CONFIGURATION ---
 HF_USERNAME = "Omriboiman"
-LOCAL_DIR = "./output/phase2_trained/checkpoint-6000"
-REPO_NAME = f"{HF_USERNAME}/yiddish-xlm-roberta-DAPT-6000"
+LOCAL_DIR = "./output/phase2_trained/checkpoint-12000"
+REPO_NAME = f"{HF_USERNAME}/yiddish-xlm-roberta-DAPT-12000"
 
 # --- 2. PASTE TOKEN HERE (Solves the 401 Error) ---
 # Replace the text inside the quotes with your actual token starting with hf_

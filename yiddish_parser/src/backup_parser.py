@@ -3,12 +3,12 @@ from huggingface_hub import login, HfApi
 
 # --- 1. CONFIGURATION ---
 HF_USERNAME = "Omriboiman"
-REPO_NAME = f"{HF_USERNAME}/yiddish-constituency-parser"  # New Repo Name for the Parser
+REPO_NAME = f"{HF_USERNAME}/yiddish-constituency-parser-scalar-12000"  # New Repo Name for the Parser
 MY_TOKEN = "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" 
 
 # Local Paths
 PARSER_FILE = "./output/phase3_parser_model/yiddish_parser.pt"
-TOKENIZER_DIR = "./output/phase2_trained/checkpoint-6000"
+TOKENIZER_DIR = "./output/phase2_trained/checkpoint-12000"
 
 # --- 2. FORCE CACHE (Safety) ---
 CACHE_DIR = "/vol/joberant_nobck/data/NLP_368307701_2526a/omriboiman/cache"
