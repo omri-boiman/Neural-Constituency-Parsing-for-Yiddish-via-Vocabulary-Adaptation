@@ -84,7 +84,7 @@ def train():
 
     args = {
         # 1. Paths
-        'train': os.path.join(DATA_DIR, 'train_lexical.txt'),
+        'train': os.path.join(DATA_DIR, 'train.txt'),
         'dev': os.path.join(DATA_DIR, 'dev.txt'),
         'test': os.path.join(DATA_DIR, 'test.txt'),
         'path': MODEL_FILE,
