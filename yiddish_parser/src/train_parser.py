@@ -4,7 +4,7 @@ import torch
 import transformers
 
 # =========================================================
-# 🩹 PATCH: Inject AdamW
+# PATCH: Inject AdamW
 # =========================================================
 transformers.AdamW = torch.optim.AdamW
 try:
@@ -24,7 +24,7 @@ except ImportError:
 from supar import CRFConstituencyParser
 
 # ================= CONFIGURATION =================
-# 🟢 FIX: Separate the Folder from the File
+# FIX: Separate the Folder from the File
 OUTPUT_DIR = './output/phase3_parser_model'
 MODEL_FILE = os.path.join(OUTPUT_DIR, 'yiddish_parser.pt')
 
@@ -50,20 +50,20 @@ def freeze_recursive(module):
     return frozen_count
 
 def apply_freeze_patch():
-    print("\n🐒 APPLYING FREEZE PATCH...")
+    print("\n APPLYING FREEZE PATCH...")
     OriginalModel = CRFConstituencyParser.MODEL
     
     class FrozenModel(OriginalModel):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            print(f"❄️  INTERCEPTED: Searching for embeddings in {self.__class__.__name__}...")
+            print(f"  INTERCEPTED: Searching for embeddings in {self.__class__.__name__}...")
             
             count = 0
             if hasattr(self, 'encoder'):
                 count = freeze_recursive(self.encoder)
             
             if count == 0:
-                print("   ⚠️ Encoder scan empty. Trying generic scan...")
+                print("Encoder scan empty. Trying generic scan...")
                 for m in self.modules():
                     if 'Embeddings' in m.__class__.__name__:
                          for p in m.parameters():
@@ -71,12 +71,12 @@ def apply_freeze_patch():
                              count += p.numel()
 
             if count > 0:
-                print(f"   ✅ SUCCESS: Frozen {count/1e6:.2f}M parameters.")
+                print(f"SUCCESS: Frozen {count/1e6:.2f}M parameters.")
             else:
-                print("   ❌ ERROR: Could not find any embeddings to freeze!")
+                print("ERROR: Could not find any embeddings to freeze!")
 
     CRFConstituencyParser.MODEL = FrozenModel
-    print("✅ Patch Applied.\n")
+    print("Patch Applied.\n")
 
 def train():
     apply_freeze_patch()
@@ -87,7 +87,7 @@ def train():
         'dev': os.path.join(DATA_DIR, 'dev.txt'),
         'test': os.path.join(DATA_DIR, 'test.txt'),
         
-        # 🟢 FIX: Save to the FILE, not the FOLDER
+        #FIX: Save to the FILE, not the FOLDER
         'path': MODEL_FILE,
         
         'mode': 'train',
@@ -150,8 +150,8 @@ def train():
         'workers': 0 
     }
     
-    print(f"🚀 Starting Training for: {ENCODER_PATH}")
-    print(f"💾 Saving model to: {MODEL_FILE}")
+    print(f"Starting Training for: {ENCODER_PATH}")
+    print(f"Saving model to: {MODEL_FILE}")
     
     config = Config(**args)
     print("   -> Building Parser instance...")
@@ -159,7 +159,7 @@ def train():
     
     print("   -> Starting Training Loop...")
     parser.train(**config)
-    print("🎉 Training Complete.")
+    print("Training Complete.")
 
 if __name__ == "__main__":
     train()
