@@ -26,7 +26,7 @@ def is_valid_tree(tree):
 def clean_file(filename):
     filepath = os.path.join(DATA_DIR, filename)
     if not os.path.exists(filepath):
-        print(f"⚠️  Skipping {filename} (not found)")
+        print(f" Skipping {filename} (not found)")
         return
 
     print(f"🧹 Scanning {filename}...")
@@ -53,21 +53,21 @@ def clean_file(filename):
                 removed_count += 1
                 # Optional: Print the first few bad ones to see what's wrong
                 if removed_count <= 3:
-                    print(f"   ❌ Removing Line {i+1} (Empty Node): {line[:50]}...")
+                    print(f"  Removing Line {i+1} (Empty Node): {line[:50]}...")
                     
         except Exception as e:
             # If NLTK can't even parse it, it's definitely garbage
             removed_count += 1
-            print(f"   ❌ Removing Line {i+1} (Parse Error): {e}")
+            print(f"Removing Line {i+1} (Parse Error): {e}")
 
     # Write back only if we removed something
     if removed_count > 0:
         with open(filepath, 'w', encoding='utf-8') as f:
             for line in valid_lines:
                 f.write(line + '\n')
-        print(f"   ✅ Cleaned {filename}: Removed {removed_count} broken trees. Saved {len(valid_lines)} trees.")
+        print(f"Cleaned {filename}: Removed {removed_count} broken trees. Saved {len(valid_lines)} trees.")
     else:
-        print(f"   ✨ {filename} was already clean.")
+        print(f"{filename} was already clean.")
 
 if __name__ == "__main__":
     for f in FILES:
