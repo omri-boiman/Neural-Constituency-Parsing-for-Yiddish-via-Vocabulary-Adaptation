@@ -8,7 +8,7 @@ REPO_NAME = f"{HF_USERNAME}/yiddish-xlm-roberta-DAPT-6000"
 
 # --- 2. PASTE TOKEN HERE (Solves the 401 Error) ---
 # Replace the text inside the quotes with your actual token starting with hf_
-MY_TOKEN = "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" 
+MY_TOKEN = "" 
 
 # --- 3. FORCE CACHE TO BIG DRIVE ---
 CACHE_DIR = "/vol/joberant_nobck/data/NLP_368307701_2526a/omriboiman/cache"
